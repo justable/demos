@@ -1,0 +1,43 @@
+.editor {
+  height: 300px;
+  outline: none;
+  padding: 15px;
+  letter-spacing: 1px;
+  border: 1px solid #666;
+  span {
+    color: #09a17b;
+  }
+  &:focus {
+    box-shadow: 0 0 20px 3px #ccc;
+  }
+}
+.box--highlight {
+  border: 1px solid #ccc;
+  box-shadow: 0 0 15px 0px #ccc;
+  border-radius: 5px;
+}
+.popover {
+  position: fixed;
+  width: 100px;
+  letter-spacing: 1px;
+  opacity: 0;
+  z-index: -1;
+  background: #fff;
+  margin: 0;
+  padding: 0;
+  &:hover {
+    cursor: pointer;
+  }
+}
+.popover-item {
+  list-style: none;
+  padding: 0 15px;
+  line-height: 40px;
+  border-top: 1px solid #ccc;
+  &:hover {
+    background: #eee;
+  }
+  &:first-child {
+    border: 0;
+  } 
+}
