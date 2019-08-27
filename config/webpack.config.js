@@ -64,7 +64,7 @@ const config = {
   mode: 'development',
   entry: getEntries(),
   output: {
-    path: resolve('dist'),
+    path: resolve('front'),
     filename: '[name].js',
     publicPath: '/',
     libraryTarget: 'umd',
