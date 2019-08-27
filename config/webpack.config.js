@@ -66,8 +66,8 @@ const config = {
   output: {
     path: resolve('front'),
     filename: '[name].js',
-    publicPath: '/',
     libraryTarget: 'umd',
+    publicPath: '/demos/front/',
   },
   devtool: 'inline-source-map',
   devServer: {
@@ -109,7 +109,7 @@ const config = {
   },
   plugins: [
     ...htmlTemplateConfig,
-    new CleanWebpackPlugin(['dist'], {
+    new CleanWebpackPlugin(['front'], {
       root: resolve(),
     }),
     // 热部署
