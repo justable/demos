@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <meta name="description" content="algolia search">
+  </head>
+  <body>
+    <main id="root">
+      <div class="header">
+        <div class="search-title">Search</div>
+        <input id="searchInput" class="search-input" type="text" placeholder="Type your keyword(s)...">
+        <!-- <button id="addWord" class="add-button">新增</button> -->
+      </div>
+      <div id="content" class="content">
+      </div>
+    </main>
+    <div id="addModal" class="modal">
+      <div class="modal-header">
+        新增数据源
+      </div>
+      <div class="modal-content">
+        <form id="modalForm" class="form" style="width: 400px">
+          <div class="form-group">
+            <label for="">姓名：</label>
+            <input type="text" class="input" name="name" placeholder="你的姓名">
+          </div>
+          <div class="form-group">
+            <label for="">年龄：</label>
+            <input type="text" class="input" name="age" placeholder="你的年龄">
+          </div>
+          <div class="form-group">
+            <label for="">职业：</label>
+            <input type="text" class="input" name="major" placeholder="你的职业">
+          </div>
+          <div class="form-group">
+            <label for="">图片：</label>
+            <input type="text" class="input" name="pic" placeholder="输入一张图片的url">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-button" id="modalCancel">取消</button>
+        <button class="modal-button" id="modalConfirm">确定</button>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
+  </body>
+</html>

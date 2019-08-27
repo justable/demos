@@ -27,47 +27,47 @@ $('upload').on('click', function(e) {
  * 2018 3.5
  * author zzy
  */
-(function () {
+(function() {
   /**
    * 上传文件构造器
    * @param filePlus file扩展对象
    * @constructor
    */
-  function OSSUploader (filePlus) {
+  function OSSUploader(filePlus) {
     // 缓存oss client
-    this.uploadFileClient = null
+    this.uploadFileClient = null;
     // 断点续传记录点
-    this.breakpoint = null
+    this.breakpoint = null;
     // 重试计数
-    this.retryCount = 0
+    this.retryCount = 0;
     // 最大重试次数
-    this.retryCountMax = 3
-    this.isCancel = false
-    this.filePlus = filePlus
-    this.applySts()
+    this.retryCountMax = 3;
+    this.isCancel = false;
+    this.filePlus = filePlus;
+    this.applySts();
   }
 
-  OSSUploader.STS_URL = '/common/fileSts.htm'
+  OSSUploader.STS_URL = '/common/fileSts.htm';
 
   /**
    * 请求sts获取token
    */
-  OSSUploader.prototype.applySts = function () {
-    var _this = this
-    var filePlus = _this.filePlus
-    var def = $.Deferred()
-    var stsUrl = OSSUploadFactory.STS_URL
+  OSSUploader.prototype.applySts = function() {
+    var _this = this;
+    var filePlus = _this.filePlus;
+    var def = $.Deferred();
+    var stsUrl = OSSUploadFactory.STS_URL;
     if (!_this.uploadFileClient) {
       $.ajax({
-        url: stsUrl
-      }).then(function (res) {
+        url: stsUrl,
+      }).then(function(res) {
         if (res.data.errorMsg) {
-          console.error(res.data.errorMsg)
-          def.reject(res.data.errorMsg)
+          console.error(res.data.errorMsg);
+          def.reject(res.data.errorMsg);
         } else {
-          var policyInf = res.data.policyInf
-          var fileList = res.data.fileList
-          genFilePlus(filePlus, function () {
+          var policyInf = res.data.policyInf;
+          var fileList = res.data.fileList;
+          genFilePlus(filePlus, function() {
             var ret = {
               policyInf: policyInf,
               fileList: fileList,
@@ -78,40 +78,40 @@ $('upload').on('click', function(e) {
                 fileKey: filePlus.uuid,
                 fileSize: filePlus.fileSize,
                 fileMd5: filePlus.MD5,
-                fileId: fileList[0].fileUuid
-              }
-            }
+                fileId: fileList[0].fileUuid,
+              },
+            };
             if (fileList[0].fileKey) {
-              ret.isUploaded = true
+              ret.isUploaded = true;
             }
-            return ret
-          })
+            return ret;
+          });
           _this.uploadFileClient = new OSS({
             region: 'oss-cn-hangzhou',
             accessKeyId: policyInf.accessKeyId,
             accessKeySecret: policyInf.accessKeySecret,
             stsToken: policyInf.securityToken,
             bucket: policyInf.bucket,
-            timeout: 180000000
-          })
-          def.resolve()
+            timeout: 180000000,
+          });
+          def.resolve();
         }
-      })
+      });
     }
-    return def
-  }
+    return def;
+  };
 
   /**
    * 上传文件执行函数
    */
-  OSSUploader.prototype.uploadFile = function () {
-    var _this = this
-    var filePlus = _this.filePlus
-    var key = filePlus.uuid
+  OSSUploader.prototype.uploadFile = function() {
+    var _this = this;
+    var filePlus = _this.filePlus;
+    var key = filePlus.uuid;
 
     const options = {
-      progress: function (p, checkpoint) {
-        _this.breakpoint = checkpoint
+      progress: function(p, checkpoint) {
+        _this.breakpoint = checkpoint;
         // TODO
       },
       partSize: 50 * 100 * 1024,
@@ -120,30 +120,33 @@ $('upload').on('click', function(e) {
       callback: {
         url: filePlus.fileConfig.callBackUrl,
         body: JSON.stringify(filePlus.fileBody),
-        contentType: 'application/json'
-      }
-    }
+        contentType: 'application/json',
+      },
+    };
     if (_this.breakpoint) {
-      options.checkpoint = _this.breakpoint
+      options.checkpoint = _this.breakpoint;
     }
-    return _this.uploadFileClient.multipartUpload(key, filePlus.sourceFile, options).then(function (res) {
-      console.log('upload success: %j', res)
-      _this.breakpoint = null
-      _this.uploadFileClient = null
-    }).catch(function (err) {
-      if (_this.uploadFileClient && _this.uploadFileClient.isCancel()) {
-        console.log('stop-upload!')
-      } else {
-        if (err.name.toLowerCase().indexOf('connectiontimeout') !== -1) {
-          // timeout retry
-          if (_this.retryCount < _this.retryCountMax) {
-            _this.retryCount++
-            _this.uploadFile()
+    return _this.uploadFileClient
+      .multipartUpload(key, filePlus.sourceFile, options)
+      .then(function(res) {
+        console.log('upload success: %j', res);
+        _this.breakpoint = null;
+        _this.uploadFileClient = null;
+      })
+      .catch(function(err) {
+        if (_this.uploadFileClient && _this.uploadFileClient.isCancel()) {
+          console.log('stop-upload!');
+        } else {
+          if (err.name.toLowerCase().indexOf('connectiontimeout') !== -1) {
+            // timeout retry
+            if (_this.retryCount < _this.retryCountMax) {
+              _this.retryCount++;
+              _this.uploadFile();
+            }
           }
         }
-      }
-    })
-  }
+      });
+  };
 
   /**
    * 上传文件管理构造器
@@ -151,14 +154,14 @@ $('upload').on('click', function(e) {
    * @param config.subSystem
    * @constructor
    */
-  function OSSUploadFactory (config) {
-    this.uploaders = {}
-    this.fileConfig = null
-    this.config = config
-    this.applyFileConfig()
+  function OSSUploadFactory(config) {
+    this.uploaders = {};
+    this.fileConfig = null;
+    this.config = config;
+    this.applyFileConfig();
   }
 
-  OSSUploadFactory.FILE_CONFIG_URL = '/common/uploadFileConfig.htm'
+  OSSUploadFactory.FILE_CONFIG_URL = '/common/uploadFileConfig.htm';
 
   /**
    * 挂载一个上传实例
@@ -166,59 +169,63 @@ $('upload').on('click', function(e) {
    * @param targetElm dom目标对象
    * @returns {string}
    */
-  OSSUploadFactory.prototype.mount = function (file, targetElm) {
-    var _this = this
-    var filePlus = genFilePlus(file, {
-      targetElm: targetElm,
-      fileConfig: _this.fileConfig
-    }, true)
-    var key = genUUID()
-    computeMD5(filePlus).then(function () {
-      _this.uploaders[key] = new OSSUploader(filePlus)
-    })
-    targetElm.data('oss', key)
-    return key
-  }
+  OSSUploadFactory.prototype.mount = function(file, targetElm) {
+    var _this = this;
+    var filePlus = genFilePlus(
+      file,
+      {
+        targetElm: targetElm,
+        fileConfig: _this.fileConfig,
+      },
+      true,
+    );
+    var key = genUUID();
+    computeMD5(filePlus).then(function() {
+      _this.uploaders[key] = new OSSUploader(filePlus);
+    });
+    targetElm.data('oss', key);
+    return key;
+  };
 
   /**
    * 卸载一个上传实例
    * @param key
    */
-  OSSUploadFactory.prototype.unmount = function (key) {
-    var _this = this
-    _this.config.unmountHook()
-    delete _this.uploaders[key]
-  }
+  OSSUploadFactory.prototype.unmount = function(key) {
+    var _this = this;
+    _this.config.unmountHook();
+    delete _this.uploaders[key];
+  };
 
   /**
    * 获取指定uploader
    * @param key
    * @returns {*}
    */
-  OSSUploadFactory.prototype.getUploaderByKey = function (key) {
-    var _this = this
-    return _this.uploaders[key]
-  }
+  OSSUploadFactory.prototype.getUploaderByKey = function(key) {
+    var _this = this;
+    return _this.uploaders[key];
+  };
   /**
    * 获取文件配置
    */
-  OSSUploadFactory.prototype.applyFileConfig = function () {
-    var _this = this
-    var fileConfigUrl = OSSUploadFactory.FILE_CONFIG_URL
-    var subSystem = _this.config.subSystem
+  OSSUploadFactory.prototype.applyFileConfig = function() {
+    var _this = this;
+    var fileConfigUrl = OSSUploadFactory.FILE_CONFIG_URL;
+    var subSystem = _this.config.subSystem;
     $.ajax({
       url: fileConfigUrl,
       data: {
-        'subSystem': subSystem
-      }
-    }).then(function (res) {
+        subSystem: subSystem,
+      },
+    }).then(function(res) {
       if (res.data.errorMsg) {
-        console.error(res.data.errorMsg)
+        console.error(res.data.errorMsg);
       } else {
-        _this.fileConfig = res.data
+        _this.fileConfig = res.data;
       }
-    })
-  }
+    });
+  };
 
   /**
    * 扩展file对象
@@ -226,17 +233,19 @@ $('upload').on('click', function(e) {
    * @param ext 自定义扩展
    * @param first 是否第一次扩展
    */
-  function genFilePlus (file, ext, first) {
-    var _this = this
-    var filePlus = file
+  function genFilePlus(file, ext, first) {
+    var _this = this;
+    var filePlus = file;
     if (first) {
-      var icon = genFileIcon(file.name)
-      var type = file.type || icon
+      var icon = genFileIcon(file.name);
+      var type = file.type || icon;
       if (icon === 'pbim') {
-        type = 'pbim'
+        type = 'pbim';
       }
       filePlus = {
-        id: Math.random().toString(36).substr(2),
+        id: Math.random()
+          .toString(36)
+          .substr(2),
         chunkList: [],
         progress: 0,
         fileKey: '',
@@ -259,89 +268,93 @@ $('upload').on('click', function(e) {
         picRadio: file.picRadio || '',
         uuid: '',
         sourceFile: file,
-        fileConfig: _this.fileConfig
-      }
+        fileConfig: _this.fileConfig,
+      };
     }
     if (ext) {
-      ext = typeof ext === 'function' ? ext() : ext
-      $.extend(filePlus, ext)
+      ext = typeof ext === 'function' ? ext() : ext;
+      $.extend(filePlus, ext);
     }
-    return filePlus
+    return filePlus;
   }
 
   /**
    * 生成uuid
    * @returns {string}
    */
-  function genUUID () {
-    return 'xxxxxxxxyyyyyyyy'.replace(/[xy]/g, function (c) {
-      var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8)
-      return v.toString(16)
-    })
+  function genUUID() {
+    return 'xxxxxxxxyyyyyyyy'.replace(/[xy]/g, function(c) {
+      var r = (Math.random() * 16) | 0,
+        v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   }
 
-  function genFileType (file) {
-    var name = file.name.toLowerCase()
+  function genFileType(file) {
+    var name = file.name.toLowerCase();
     if (/\.(gif|jpg|jpeg|png)$/.test(name)) {
-      return 1
+      return 1;
     }
     if (/\.(wav|flav|ape|alac|mp3|JPaavG|ogg|opus)$/.test(name)) {
-      return 2
+      return 2;
     }
     if (/\.(mpeg|avi|mov|asf|wmv|nvai|3gp|ra|ram|mkv|flv|f4v|rmvb|webm|mp4)$/.test(name)) {
-      return 3
+      return 3;
     }
-    return 4
+    return 4;
   }
 
-  function genFileBold (file) {
+  function genFileBold(file) {
     if (file.type.substr(0, 6) === 'image/') {
-      var URL = window.URL || window.webkitURL
+      var URL = window.URL || window.webkitURL;
       if (URL && URL.createObjectURL) {
-        return URL.createObjectURL(file)
+        return URL.createObjectURL(file);
       }
     }
   }
 
-  function genFileIcon (name) {
-    return name.slice(name.lastIndexOf('.') + 1).toLowerCase()
+  function genFileIcon(name) {
+    return name.slice(name.lastIndexOf('.') + 1).toLowerCase();
   }
 
   /**
    * 计算文件的MD5
    * @param filePlus
    */
-  function computeMD5 (filePlus) {
-    var def = $.Deferred()
-    var fileReader = new FileReader()
-    var blobSlice = File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice
-    var sparkChunkSize = 5242880
-    var sparkChunks = Math.ceil(filePlus.sourceFile.size / sparkChunkSize)
-    var currentChunk = 0
-    fileReader.onload = function (e) {
-      var spark = new SparkMD5.ArrayBuffer()
+  function computeMD5(filePlus) {
+    var def = $.Deferred();
+    var fileReader = new FileReader();
+    var blobSlice = File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice;
+    var sparkChunkSize = 5242880;
+    var sparkChunks = Math.ceil(filePlus.sourceFile.size / sparkChunkSize);
+    var currentChunk = 0;
+    fileReader.onload = function(e) {
+      var spark = new SparkMD5.ArrayBuffer();
       genFilePlus(filePlus, {
-        progressMD5: (currentChunk + 1) / sparkChunks * 100
-      })
-      spark.append(e.target.result)
-      currentChunk++
+        progressMD5: ((currentChunk + 1) / sparkChunks) * 100,
+      });
+      spark.append(e.target.result);
+      currentChunk++;
       if (currentChunk < sparkChunks) {
-        loadNext()
+        loadNext();
       } else {
         genFilePlus(filePlus, {
-          MD5: spark.end()
-        })
-        def.resolve()
+          MD5: spark.end(),
+        });
+        def.resolve();
       }
-    }
-    var loadNext = function () {
-      var start = currentChunk * sparkChunkSize
-      var end = start + sparkChunkSize >= filePlus.sourceFile.size ? filePlus.sourceFile.size : start + sparkChunkSize
-      fileReader.readAsArrayBuffer(blobSlice.call(filePlus.sourceFile, start, end))
-    }
-    loadNext()
-    return def
+    };
+    var loadNext = function() {
+      var start = currentChunk * sparkChunkSize;
+      var end =
+        start + sparkChunkSize >= filePlus.sourceFile.size
+          ? filePlus.sourceFile.size
+          : start + sparkChunkSize;
+      fileReader.readAsArrayBuffer(blobSlice.call(filePlus.sourceFile, start, end));
+    };
+    loadNext();
+    return def;
   }
 
-  $.OSSUploadFactory = OSSUploadFactory
-}())
+  $.OSSUploadFactory = OSSUploadFactory;
+})();

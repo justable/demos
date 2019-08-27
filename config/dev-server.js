@@ -1,7 +1,7 @@
-const WebpackDevServer = require('webpack-dev-server')
-const webpack = require('webpack')
-const {resolve} = require('./utils')
-const config = require('./webpack.config.js')
+const WebpackDevServer = require('webpack-dev-server');
+const webpack = require('webpack');
+const { resolve } = require('./utils');
+const config = require('./webpack.config.js');
 
 const options = {
   contentBase: resolve('dist'),
@@ -10,13 +10,13 @@ const options = {
   hot: true,
   compress: true,
   open: true,
-  host: 'localhost'
-}
+  host: 'localhost',
+};
 
-WebpackDevServer.addDevServerEntrypoints(config, options)
-const compiler = webpack(config)
-const server = new WebpackDevServer(compiler, options)
+WebpackDevServer.addDevServerEntrypoints(config, options);
+const compiler = webpack(config);
+const server = new WebpackDevServer(compiler, options);
 
 server.listen(5000, 'localhost', () => {
-  console.log('dev server listening on port 5000')
-})
+  console.log('dev server listening on port 5000');
+});

@@ -1,8 +1,8 @@
-const path = require('path')
+const path = require('path');
 const resolve = (p = '', root = '../') => {
-  return path.resolve(__dirname, root, p)
-}
+  return path.resolve(__dirname, root, p);
+};
 
 module.exports = {
-  resolve
-}
+  resolve,
+};
