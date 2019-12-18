@@ -3,6 +3,7 @@ const glob = require('glob');
 const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 /**
  * 获取入口
@@ -114,6 +115,7 @@ const config = {
     }),
     // 热部署
     new webpack.HotModuleReplacementPlugin(),
+    new CopyWebpackPlugin([{ from: 'src/static', to: 'static' }]),
   ],
 };
 module.exports = config;
