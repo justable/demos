@@ -5,6 +5,8 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+const nodeEnv = process.env.NODE_ENV;
+console.log(nodeEnv)
 /**
  * 获取入口
  */
@@ -68,11 +70,11 @@ const config = {
     path: resolve('front'),
     filename: '[name].js',
     libraryTarget: 'umd',
-    publicPath: '/demos/front/',
+    publicPath: nodeEnv === 'dev' ? '/' : '/demos/front/',
   },
   devtool: 'inline-source-map',
   devServer: {
-    contentBase: resolve('dist'),
+    contentBase: false,
     publicPath: '/',
     index: 'index.html',
     hot: true,

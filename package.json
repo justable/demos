@@ -4,8 +4,8 @@
   "description": "You can use the [editor on GitHub](https://github.com/justable/demos/edit/master/README.md) to maintain and preview the content for your website in Markdown files.",
   "main": "src/index.js",
   "scripts": {
-    "build": "webpack --config config/webpack.config.js",
-    "start": "webpack-dev-server --config config/webpack.config.js --open",
+    "build": "cross-env NODE_ENV=prod webpack --config config/webpack.config.js",
+    "start": "cross-env NODE_ENV=dev webpack-dev-server --config config/webpack.config.js --open",
     "start:node": "node config/dev-server.js"
   },
   "repository": {
@@ -28,6 +28,7 @@
     "babel-loader": "^8.0.5",
     "clean-webpack-plugin": "^1.0.0",
     "copy-webpack-plugin": "^5.1.1",
+    "cross-env": "^7.0.0",
     "css-loader": "^2.1.0",
     "html-webpack-plugin": "^3.2.0",
     "node-sass": "^4.13.0",
